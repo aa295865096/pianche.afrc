@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#121212">
+  <meta name="description" content="AFRC 舵机无线调参网页端，支持通过 Chrome 或 Edge 连接蓝牙模块进行参数读取与写入。">
+  <title>AFRC舵机无线调参</title>
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="container dark-theme">
+      <section class="top-ad" aria-label="顶部广告位">
+        <div class="ad-swiper" id="adSwiper">
+          <div class="ad-slide is-active">
+            <div class="ad-tag">AFRC</div>
+            <div class="ad-title">无线调参网页端</div>
+            <div class="ad-subtitle">正式发布版布局，对齐小程序页面</div>
+          </div>
+          <div class="ad-slide">
+            <div class="ad-tag">BLE</div>
+            <div class="ad-title">Chrome / Edge 直连</div>
+            <div class="ad-subtitle">通过 Web Bluetooth 连接 ESP32 蓝牙网关</div>
+          </div>
+        </div>
+        <div class="ad-dots" id="adDots" aria-hidden="true">
+          <span class="ad-dot is-active"></span>
+          <span class="ad-dot"></span>
+        </div>
+      </section>
+
+      <section class="status-panel">
+        <div class="status-info">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text" id="statusText">未连接</span>
+        </div>
+        <button class="connect-btn" id="connectBtn" type="button">扫描连接</button>
+      </section>
+
+      <section class="mac-panel hidden" id="devicePanel">
+        <span class="mac-label" id="deviceIdText">Device ID: --</span>
+        <button class="copy-btn" id="copyIdBtn" type="button">复制</button>
+      </section>
+
+      <section class="device-list hidden" id="deviceHintPanel">
+        <div class="device-item">
+          <span class="device-name">浏览器正在请求蓝牙设备</span>
+          <span class="device-rssi">系统弹窗</span>
+        </div>
+      </section>
+
+      <section class="log-panel">
+        <span class="log-line">V0.1</span>
+        <span class="log-line" id="infoText">Info: AFRC Proxy Gateway V2.0</span>
+        <span class="log-line" id="adapterPluginText">Adapter disconnected</span>
+        <span class="log-line" id="servoPluginText">Servo disconnected</span>
+
+        <button class="buy-module-tip" id="buyModuleBtn" type="button">
+          <span class="buy-title">购买蓝牙调参模块</span>
+          <span class="buy-tag">点击联系客服</span>
+        </button>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div class="header-line"></div>
+          <h2 class="card-title">BASIC PARAMETERS</h2>
+        </header>
+
+        <div class="param-item">
+          <div class="param-label-row">
+            <span class="param-name">Servo Angle</span>
+            <span class="param-value" id="servoAngleValue">220</span>
+          </div>
+          <div class="slider-row">
+            <button class="icon-btn" data-field="servoAngle" data-step="-1" data-min="0" data-max="255" type="button">-</button>
+            <input class="flex-slider" id="servoAngle" type="range" min="0" max="255" step="1" value="220">
+            <button class="icon-btn" data-field="servoAngle" data-step="1" data-min="0" data-max="255" type="button">+</button>
+          </div>
+        </div>
+
+        <div class="param-item">
+          <div class="param-label-row">
+            <span class="param-name">Servo Neutral</span>
+            <span class="param-value" id="servoNeutralValue">0</span>
+          </div>
+          <div class="slider-row">
+            <button class="icon-btn" data-field="servoNeutral" data-step="-1" data-min="-127" data-max="127" type="button">-</button>
+            <input class="flex-slider" id="servoNeutral" type="range" min="-127" max="127" step="1" value="0">
+            <button class="icon-btn" data-field="servoNeutral" data-step="1" data-min="-127" data-max="127" type="button">+</button>
+          </div>
+        </div>
+
+        <div class="param-item">
+          <div class="param-label-row">
+            <span class="param-name">Damping Factor</span>
+            <span class="param-value" id="dampingFactorValue">50</span>
+          </div>
+          <div class="slider-row">
+            <button class="icon-btn" data-field="dampingFactor" data-step="-1" data-min="50" data-max="1000" type="button">-</button>
+            <input class="flex-slider" id="dampingFactor" type="range" min="50" max="1000" step="1" value="50">
+            <button class="icon-btn" data-field="dampingFactor" data-step="1" data-min="50" data-max="1000" type="button">+</button>
+          </div>
+        </div>
+
+        <div class="param-item">
+          <div class="param-label-row">
+            <span class="param-name">PWM Power</span>
+            <span class="param-value" id="pwmPowerDisplayValue">89.0 %</span>
+          </div>
+          <div class="slider-row">
+            <button class="icon-btn" data-field="pwmPowerRaw" data-step="-1" data-min="100" data-max="255" type="button">-</button>
+            <input class="flex-slider" id="pwmPowerRaw" type="range" min="100" max="255" step="1" value="227">
+            <button class="icon-btn" data-field="pwmPowerRaw" data-step="1" data-min="100" data-max="255" type="button">+</button>
+          </div>
+        </div>
+
+        <div class="param-item">
+          <div class="param-label-row">
+            <span class="param-name">Sensitivity</span>
+            <span class="param-value" id="sensitivityLevelValue">Ultra High</span>
+          </div>
+          <div class="slider-row">
+            <button class="icon-btn" data-field="sensitivityLevel" data-step="-1" data-min="1" data-max="4" type="button">-</button>
+            <input class="flex-slider" id="sensitivityLevel" type="range" min="1" max="4" step="1" value="1">
+            <button class="icon-btn" data-field="sensitivityLevel" data-step="1" data-min="1" data-max="4" type="button">+</button>
+          </div>
+        </div>
+
+        <div class="switch-container">
+          <button class="switch-item" id="softStartToggle" type="button">
+            <span class="checkbox" id="softStartCheckbox"></span>
+            <span class="switch-text">Soft Start</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div class="header-line"></div>
+          <h2 class="card-title">Servo Information</h2>
+        </header>
+        <div class="info-row">
+          <span class="info-label">Servo Name</span>
+          <span class="info-value" id="servoNameValue">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Manufacture</span>
+          <span class="info-value" id="manufactureDateValue">--</span>
+        </div>
+      </section>
+
+      <section class="feedback-panel">
+        <button class="feedback-btn" id="copyFeedbackBtn" type="button">复制数据包反馈</button>
+        <div class="feedback-hint-wrap">
+          <span class="feedback-hint">如果遇到舵机无法正常写入或参数异常，请点击此按钮复制底层数据包并反馈给开发者分析</span>
+        </div>
+      </section>
+
+      <section class="contact-panel">
+        <button class="contact-btn" id="contactBtn" type="button">复制客服微信</button>
+      </section>
+    </section>
+
+    <nav class="bottom-bar">
+      <button class="action-btn read-btn" id="readBtn" type="button">Read</button>
+      <button class="action-btn write-btn" id="writeBtn" type="button">Write</button>
+      <button class="action-btn default-btn" id="defaultBtn" type="button">Default</button>
+    </nav>
+  </main>
+
+  <dialog class="modal" id="messageDialog">
+    <div class="modal-card">
+      <h3 class="modal-title" id="dialogTitle">提示</h3>
+      <p class="modal-content" id="dialogContent"></p>
+      <div class="modal-actions" id="dialogActions"></div>
+    </div>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>

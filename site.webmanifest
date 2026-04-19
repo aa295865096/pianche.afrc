@@ -1,0 +1,10 @@
+{
+  "name": "AFRC舵机无线调参",
+  "short_name": "AFRC调参",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "zh-CN",
+  "description": "AFRC servo BLE web tool for Chrome and Edge browsers."
+}
